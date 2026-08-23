@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users      Membership[]
+  leads      Lead[]
+  aiAgents   AIAgent[]
+  properties Property[]
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships Membership[]
+}
+
+model Membership {
+  id   String @id @default(cuid())
+  role String @default("member")
+
+  userId         String
+  organizationId String
+
+  user         User         @relation(fields: [userId], references: [id])
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, organizationId])
+}
+
+model Lead {
+  id       String  @id @default(cuid())
+  name     String?
+  email    String?
+  phone    String?
+  budget   String?
+  location String?
+  status   String  @default("new")
+  score    Int     @default(0)
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  conversations Conversation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Conversation {
+  id      String @id @default(cuid())
+  channel String @default("website")
+  status  String @default("active")
+
+  leadId String
+  lead   Lead   @relation(fields: [leadId], references: [id])
+
+  messages Message[]
+
+  createdAt DateTime @default(now())
+}
+
+model Message {
+  id      String @id @default(cuid())
+  sender  String
+  content String
+
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model AIAgent {
+  id           String  @id @default(cuid())
+  name         String
+  instructions String?
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Property {
+  id       String  @id @default(cuid())
+  title    String
+  location String?
+  price    String?
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  createdAt DateTime @default(now())
+}
