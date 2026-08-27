@@ -1,5 +1,6 @@
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { prisma } from "@/lib/prisma";
+import CreateLeadForm from "@/components/leads/create-lead-form";
 
 export default async function LeadsPage() {
   const current = await getCurrentUser();
@@ -23,6 +24,10 @@ export default async function LeadsPage() {
         Organization: {current.organization.name}
       </p>
 
+      <div className="mt-8">
+        <CreateLeadForm />
+      </div>
+
       <div className="mt-8 space-y-4">
         {leads.length === 0 ? (
           <p>No leads found.</p>
@@ -36,29 +41,12 @@ export default async function LeadsPage() {
                 {lead.name ?? "Unnamed Lead"}
               </h2>
 
-              <p>
-                Email: {lead.email ?? "N/A"}
-              </p>
-
-              <p>
-                Phone: {lead.phone ?? "N/A"}
-              </p>
-
-              <p>
-                Location: {lead.location ?? "N/A"}
-              </p>
-
-              <p>
-                Budget: {lead.budget ?? "N/A"}
-              </p>
-
-              <p>
-                Status: {lead.status}
-              </p>
-
-              <p>
-                Score: {lead.score}
-              </p>
+              <p>Email: {lead.email ?? "N/A"}</p>
+              <p>Phone: {lead.phone ?? "N/A"}</p>
+              <p>Location: {lead.location ?? "N/A"}</p>
+              <p>Budget: {lead.budget ?? "N/A"}</p>
+              <p>Status: {lead.status}</p>
+              <p>Score: {lead.score}</p>
             </div>
           ))
         )}
