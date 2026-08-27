@@ -8,7 +8,7 @@ export async function GET() {
       status: "ok",
       database: "connected",
     });
-  } catch (error) {
+  } catch {
     return Response.json(
       {
         status: "error",
