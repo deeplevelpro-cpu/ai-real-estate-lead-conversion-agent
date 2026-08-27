@@ -1,13 +1,8 @@
-import { redirect } from "next/navigation";
-import { getSession } from "@/lib/auth/session";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import LogoutButton from "@/components/logout-button";
 
 export default async function DashboardPage() {
-  const session = await getSession();
-
-  if (!session) {
-    redirect("/login");
-  }
+  const current = await getCurrentUser();
 
   return (
     <main className="min-h-screen p-8">
@@ -19,9 +14,20 @@ export default async function DashboardPage() {
         <LogoutButton />
       </div>
 
-      <p className="mt-4">
-        Welcome, {session.user.name ?? session.user.email}
-      </p>
+      <div className="mt-8 space-y-2">
+        <p>
+          Welcome,{" "}
+          {current.user.name ?? current.user.email}
+        </p>
+
+        <p>
+          Organization: {current.organization.name}
+        </p>
+
+        <p>
+          Role: {current.role}
+        </p>
+      </div>
     </main>
   );
 }
