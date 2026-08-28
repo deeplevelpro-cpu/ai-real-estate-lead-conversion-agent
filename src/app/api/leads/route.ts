@@ -5,7 +5,8 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-const current = await requireAuth();
+    const current = await requireAuth();
+
     const leads = await prisma.lead.findMany({
       where: {
         organizationId: current.organization.id,
@@ -19,53 +20,52 @@ const current = await requireAuth();
       leads,
     });
   } catch (error) {
-  if (
-    error instanceof Error &&
-    error.message === "UNAUTHORIZED"
-  ) {
+    if (
+      error instanceof Error &&
+      error.message === "UNAUTHORIZED"
+    ) {
+      return NextResponse.json(
+        {
+          error: {
+            code: "UNAUTHORIZED",
+            message: "Unauthorized",
+          },
+        },
+        {
+          status: 401,
+        }
+      );
+    }
+
+    console.error(error);
+
     return NextResponse.json(
       {
-        error: "Unauthorized",
+        error: {
+          code: "INTERNAL_ERROR",
+          message: "Internal server error",
+        },
       },
       {
-        status: 401,
+        status: 500,
       }
     );
   }
-
-  console.error(error);
-
-  return NextResponse.json(
-    {
-      error: "Internal server error",
-    },
-    {
-      status: 500,
-    }
-  );
 }
-}
+
 export async function POST(req: Request) {
   try {
-    const current = await getCurrentUser();
+    const current = await requireAuth();
 
     const body = await req.json();
 
-    const {
-      name,
-      email,
-      phone,
-      budget,
-      location,
-    } = body;
-
     const lead = await prisma.lead.create({
       data: {
-        name,
-        email,
-        phone,
-        budget,
-        location,
+        name: body.name,
+        email: body.email,
+        phone: body.phone,
+        budget: body.budget,
+        location: body.location,
         organizationId: current.organization.id,
       },
     });
@@ -74,11 +74,31 @@ export async function POST(req: Request) {
       lead,
     });
   } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message === "UNAUTHORIZED"
+    ) {
+      return NextResponse.json(
+        {
+          error: {
+            code: "UNAUTHORIZED",
+            message: "Unauthorized",
+          },
+        },
+        {
+          status: 401,
+        }
+      );
+    }
+
     console.error(error);
 
     return NextResponse.json(
       {
-        error: "Failed to create lead",
+        error: {
+          code: "INTERNAL_ERROR",
+          message: "Internal server error",
+        },
       },
       {
         status: 500,
