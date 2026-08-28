@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
 
-import { getCurrentUser } from "@/lib/auth/current-user";
+import { requireAuth } from "@/lib/auth/require-auth";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const current = await getCurrentUser();
-
+const current = await requireAuth();
     const leads = await prisma.lead.findMany({
       where: {
         organizationId: current.organization.id,
@@ -20,19 +19,32 @@ export async function GET() {
       leads,
     });
   } catch (error) {
-    console.error(error);
-
+  if (
+    error instanceof Error &&
+    error.message === "UNAUTHORIZED"
+  ) {
     return NextResponse.json(
       {
-        error: "Failed to fetch leads",
+        error: "Unauthorized",
       },
       {
-        status: 500,
+        status: 401,
       }
     );
   }
-}
 
+  console.error(error);
+
+  return NextResponse.json(
+    {
+      error: "Internal server error",
+    },
+    {
+      status: 500,
+    }
+  );
+}
+}
 export async function POST(req: Request) {
   try {
     const current = await getCurrentUser();

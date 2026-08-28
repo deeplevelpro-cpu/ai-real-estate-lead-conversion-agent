@@ -6,7 +6,14 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
-
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  MEETING
+  CONVERTED
+  LOST
+}
 model Organization {
   id        String   @id @default(cuid())
 
@@ -67,15 +74,14 @@ model Lead {
   phone    String?
   budget   String?
   location String?
-  status   String  @default("new")
-  score    Int     @default(0)
-
-  organizationId String
+ status   LeadStatus @default(NEW)
+score  Int        @default(0)
+organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
 
   conversations Conversation[]
 
-  createdAt DateTime @default(now())
+ createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 

@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+
 
 import { getSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
@@ -7,7 +7,7 @@ export async function getCurrentUser() {
   const session = await getSession();
 
   if (!session) {
-    redirect("/login");
+throw new Error("Unauthorized");
   }
 
   const membership = await prisma.membership.findFirst({
