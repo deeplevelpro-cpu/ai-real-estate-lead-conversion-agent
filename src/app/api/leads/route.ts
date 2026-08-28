@@ -1,3 +1,4 @@
+import { createLeadSchema } from "@/lib/validation/create-lead";
 import { NextResponse } from "next/server";
 
 import { requireAuth } from "@/lib/auth/require-auth";
@@ -57,17 +58,28 @@ export async function POST(req: Request) {
   try {
     const current = await requireAuth();
 
-    const body = await req.json();
+        const body = await req.json();
 
+    const result = createLeadSchema.safeParse(body);
+
+    if (!result.success) {
+      return NextResponse.json(
+        {
+          error: {
+            code: "BAD_REQUEST",
+            message: "Invalid lead data",
+          },
+        },
+        {
+          status: 400,
+        }
+      );
+    }
     const lead = await prisma.lead.create({
-      data: {
-        name: body.name,
-        email: body.email,
-        phone: body.phone,
-        budget: body.budget,
-        location: body.location,
-        organizationId: current.organization.id,
-      },
+data: {
+  ...result.data,
+  organizationId: current.organization.id,
+},
     });
 
     return NextResponse.json({
