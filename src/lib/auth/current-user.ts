@@ -30,8 +30,6 @@ export async function getCurrentUser() {
         name:
           `${clerkUser.firstName ?? ""} ${clerkUser.lastName ?? ""}`.trim() ||
           null,
-        passwordHash: "",
-        salt: "",
       },
     });
   }

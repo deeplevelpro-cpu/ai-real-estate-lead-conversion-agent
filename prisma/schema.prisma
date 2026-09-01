@@ -29,28 +29,14 @@ model Organization {
 
 model User {
   id           String   @id @default(cuid())
-  clerkId      String?  @unique
+  clerkId      String   @unique
   email        String   @unique
   name         String?
-  passwordHash String
-  salt         String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   memberships Membership[]
-  sessions    Session[]
-}
-
-model Session {
-  id        String   @id @default(cuid())
-  token     String   @unique
-
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-
-  expiresAt DateTime
-  createdAt DateTime @default(now())
 }
 
 model Membership {
