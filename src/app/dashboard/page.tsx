@@ -1,6 +1,9 @@
+import { auth } from "@clerk/nextjs/server";
 import { UserButton } from "@clerk/nextjs";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  await auth.protect();
+
   return (
     <main className="min-h-screen p-8">
       <div className="flex justify-between items-center">
