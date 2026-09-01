@@ -1,33 +1,25 @@
-import { getCurrentUser } from "@/lib/auth/current-user";
-import LogoutButton from "@/components/logout-button";
+import { UserButton } from "@clerk/nextjs";
 
-export default async function DashboardPage() {
-  const current = await getCurrentUser();
-
+export default function DashboardPage() {
   return (
     <main className="min-h-screen p-8">
-      <div className="flex justify-between">
+      <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">
-          AI Real Estate Dashboard
+          AI Real Estate Lead Conversion Agent
         </h1>
 
-        <LogoutButton />
+        <UserButton />
       </div>
 
-      <div className="mt-8 space-y-2">
-        <p>
-          Welcome,{" "}
-          {current.user.name ?? current.user.email}
-        </p>
+      <section className="mt-10">
+        <h2 className="text-xl font-semibold">
+          Dashboard
+        </h2>
 
-        <p>
-          Organization: {current.organization.name}
+        <p className="mt-4 text-gray-600">
+          Welcome to your AI-powered real estate lead conversion workspace.
         </p>
-
-        <p>
-          Role: {current.role}
-        </p>
-      </div>
+      </section>
     </main>
   );
 }
