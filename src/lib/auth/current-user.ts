@@ -1,18 +1,44 @@
-
-
-import { getSession } from "@/lib/auth/session";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 
 export async function getCurrentUser() {
-  const session = await getSession();
+  const { userId } = await auth();
 
-  if (!session) {
-throw new Error("Unauthorized");
+  if (!userId) {
+    throw new Error("Unauthorized");
   }
 
-  const membership = await prisma.membership.findFirst({
+  const clerkUser = await currentUser();
+
+  if (!clerkUser) {
+    throw new Error("Clerk user not found");
+  }
+
+  let user = await prisma.user.findUnique({
     where: {
-      userId: session.userId,
+      clerkId: userId,
+    },
+  });
+
+  if (!user) {
+    user = await prisma.user.create({
+      data: {
+        clerkId: userId,
+        email:
+          clerkUser.emailAddresses[0]?.emailAddress ??
+          `${userId}@clerk.local`,
+        name:
+          `${clerkUser.firstName ?? ""} ${clerkUser.lastName ?? ""}`.trim() ||
+          null,
+        passwordHash: "",
+        salt: "",
+      },
+    });
+  }
+
+  let membership = await prisma.membership.findFirst({
+    where: {
+      userId: user.id,
     },
     include: {
       organization: true,
@@ -20,11 +46,26 @@ throw new Error("Unauthorized");
   });
 
   if (!membership) {
-    throw new Error("User has no organization");
+    const organization = await prisma.organization.create({
+      data: {
+        name: `${user.name ?? "My"} Real Estate`,
+      },
+    });
+
+    membership = await prisma.membership.create({
+      data: {
+        userId: user.id,
+        organizationId: organization.id,
+        role: "owner",
+      },
+      include: {
+        organization: true,
+      },
+    });
   }
 
   return {
-    user: session.user,
+    user,
     organization: membership.organization,
     role: membership.role,
   };
