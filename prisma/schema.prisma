@@ -63,6 +63,12 @@ model Lead {
   location String?
  status   LeadStatus @default(NEW)
 score  Int        @default(0)
+
+aiIntent       String?
+aiSummary      String?
+temperature    String?
+lastAnalyzedAt DateTime?
+
 organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
 
